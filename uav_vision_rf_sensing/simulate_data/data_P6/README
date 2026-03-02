@@ -1,0 +1,126 @@
+
+##======================test_and_save_a_all.py============================##
+##================================方位角===================================##
+##=====通过调整set_dataset_time.py中的测试集文件夹，指定不同SNR的回波感知数据=====##
+##========================================================================##
+
+SNR=0,无数据丢失情况:
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.3806
+Echo-Only vs 真实值: 0.5236
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0.pth
+
+SNR=-1,无数据丢失情况:
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.4210
+Echo-Only vs 真实值: 0.5823
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr-1.pth
+
+SNR=-2,无数据丢失情况:
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.4580
+Echo-Only vs 真实值: 0.6467
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr-2.pth
+
+方位角RMSE计算结果：
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.5070
+Echo-Only vs 真实值: 0.7303
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr-3.pth
+
+##------通过set_INOUT_data_someError函数的Etype,指定不同丢失和填充数据方式------##
+##------------------------------------------------------------------------##
+##-----------echo-only数据丢失只能Etype='echo_error_is_last_echo'-----------##
+##---------------为了仿真方便，最近的echo数据取的是第一个时隙的数据---------------##
+少丢失情况：
+
+SNR=0
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.3831
+Echo-Only vs 真实值: 0.5315  *这是有效值
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0_fewLostEcho02_echo-only.pth
+
+SNR=-2
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.4563
+Echo-Only vs 真实值: 0.6459  *这是有效值
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr-2_fewLostEcho02_echo-only.pth
+
+多丢失情况：
+SNR=0
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.3887
+Echo-Only vs 真实值: 0.5388 *这是有效值
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0_lotLostEcho09_echo-only.pth
+
+SNR=-2
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.4574
+Echo-Only vs 真实值: 0.6638  *这是有效值
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr-2_lotLostEcho09_echo-only.pth
+
+##------------------------------------------------------------------------##
+##-----------Multi-Modal数据丢失采用Etype='echo_error_is_vision'------------##
+
+少丢失情况：
+SNR=0
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.3832 *这是有效值
+Echo-Only vs 真实值: 0.5230
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0_fewLostEcho02_multimodal.pth
+
+多丢失情况：
+SNR=0
+Vision-Only vs 真实值: 0.5051
+Multi-Modal vs 真实值: 0.3832 *这是有效值
+Echo-Only vs 真实值: 0.5230
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0_lotLostEcho09_multimodal.pth
+
+
+##======================test_and_save_b_all.py============================##
+##================================仰角=====================================##
+##=====通过调整set_dataset_time.py中的测试集文件夹，指定不同SNR的回波感知数据=====##
+##========================================================================##
+
+SNR=0,无数据丢失情况:
+Vision-Only vs 真实值: 1.6321
+Multi-Modal vs 真实值: 0.7396
+Echo-Only vs 真实值: 0.7648
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_b_snr0.pth
+
+SNR=-1,无数据丢失情况:
+Vision-Only vs 真实值: 1.6321
+Multi-Modal vs 真实值: 0.7360
+Echo-Only vs 真实值: 0.7711
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_b_snr-1.pth
+
+SNR=-2,无数据丢失情况:
+Vision-Only vs 真实值: 1.6321
+Multi-Modal vs 真实值: 0.7772
+Echo-Only vs 真实值: 0.8377
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_b_snr-2.pth
+
+SNR=-3,无数据丢失情况:
+Vision-Only vs 真实值: 1.6321
+Multi-Modal vs 真实值: 0.8317
+Echo-Only vs 真实值: 0.9062
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_b_snr-3.pth
+
+##------通过set_INOUT_data_someError函数的Etype,指定不同丢失和填充数据方式------##
+##------------------------------------------------------------------------##
+##----------------------Etype='echo_error_is_last_echo'-------------------##
+##---------------为了仿真方便，最近的echo数据取的是第一个时隙的数据---------------##
+少丢失情况：
+SNR=0
+Vision-Only vs 真实值: 1.6321
+Multi-Modal vs 真实值: 0.7569
+Echo-Only vs 真实值: 0.7896
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_b_snr0_fewLostEcho02.pth
+多丢失情况：
+SNR=0
+仰角RMSE计算结果：
+Vision-Only vs 真实值: 1.6321
+Multi-Modal vs 真实值: 0.7918
+Echo-Only vs 真实值: 0.8216
+Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_pred_b_snr0_lotLostEcho09.pth
+
