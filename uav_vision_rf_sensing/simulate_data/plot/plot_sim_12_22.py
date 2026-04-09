@@ -93,10 +93,10 @@ if __name__ == "__main__":
     ##=========================== 获取数据 ========================##
     current_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(current_dir)
-    load_path = os.path.join(parent_dir, 'data_P6', 'vision_net_est_ab_new.pth')  # 波束训练阶段的，vision2ab
-    #load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_ab_no_ic.pth')  # 波束训练阶段的，vision2ab
-    #load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_plusInCA_ab_new.pth')  # 波束训练阶段的，vision2ab
-    load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_Concat_ab_new.pth')  # 波束训练阶段的，vision2ab
+    load_path = os.path.join(parent_dir, 'data_P6', 'vision_net_est_ab_new_325.pth')  # 波束训练阶段的，vision2ab
+    load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_ab_no_ic_325.pth')  # 波束训练阶段的，vision2ab
+    # load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_plusInCA_ab_new.pth')  # 波束训练阶段的，vision2ab
+    # load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_Concat_ab_new.pth')  # 波束训练阶段的，vision2ab
 
     az_diff, el_diff, az_nmse_db, el_nmse_db, = process_vision_data(load_path)
     az_diff2, el_diff2, az_nmse_db2, el_nmse_db2, = process_vision_data(load_path2)
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #bins=100
     sns.histplot(az_diff, bins=bins, color='#6B8E23', alpha=0.6, kde=True, stat='probability', label='V2EDA')
     sns.histplot(az_diff2, bins=bins, color='#FFA500', alpha=0.3, kde=True, stat='probability',
-                 label='V2EDA w/o $i_c$', line_kws={'linestyle': '--'})
+                 label='V2EDA w/o $i_c $', line_kws={'linestyle': '--'})
     #plt.title(f'Azimuth Error\\\\\\\\n(MSE = {az_rmse_str})')
     plt.xlabel('Error (rad)', fontsize=18)
     plt.ylabel('Frequency', fontsize=18)
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     plt.figure(figsize=(8, 3))
     sns.histplot(el_diff, bins=bins, color='#6B8E23', alpha=0.6, kde=True, stat='probability', label='V2EDA')
     sns.histplot(el_diff2, bins=bins, color='#FFA500', alpha=0.3, kde=True, stat='probability',
-                 label='V2EDA w/o $i_c$', line_kws={'linestyle': '--'})
+                 label='V2EDA with contant', line_kws={'linestyle': '--'})
     #plt.title(f'Elevation Error\\\\\\\\n(MSE = {el_rmse_str})')
     plt.xlabel('Error (rad)', fontsize=18)
     plt.ylabel('Frequency', fontsize=18)

@@ -5,7 +5,7 @@ import sys
 sys.path.append("...")
 import matplotlib.pyplot as plt
 from Calibration_nets.vision_net_est_ab_light import Vision_Net
-from FusionPredict_net.functions import set_INOUT_data, set_INOUT_data_someError
+from FusionPredict_net.functions import set_INOUT_data, set_INOUT_data_someError, set_INOUT_data_timeOffset
 
 from data_process import uav_dataset_set_time
 # 固定随机种子（自定义一个整数，如42，关键是每次运行用同一个值）
@@ -48,7 +48,8 @@ def test_and_save(right_model, model1, model2, test_loader, device, model1_path,
             # input_data_echo:[B,T,4] echo 中获取的参数，包括0~t-1时刻的abdv估计
             # output_data_true: [B,1,4] UAV的GPS中提取的abdv参数，作为真实数据。 包括t时刻的abdv参数
             #input_data_vision, input_data_echo, output_data_true = set_INOUT_data(batch, right_model, device)
-            input_data_vision, input_data_echo, output_data_true = set_INOUT_data_someError(batch, right_model, device)
+            #input_data_vision, input_data_echo, output_data_true = set_INOUT_data_someError(batch, right_model, device)
+            input_data_vision, input_data_echo, output_data_true = set_INOUT_data_timeOffset(batch, right_model, device)
             input_data_vision = input_data_vision[:,:,0:2]
             input_data_echo   = input_data_echo[:,:,0:3]
             output_data_true  = output_data_true[:,:,0:3]
@@ -205,17 +206,17 @@ if __name__ == "__main__":
     train_loader, test_loader = uav_dataset_set_time(7)
     print("dataset load")
     # 创建 FusuinPredict_Net 模型
-    from FusionPredict_net import PredA_Net as PredModel_MMFE
+    from fuse_net_VisionFirstCome_pred_timeError_a_1 import PredModel as PredModel_MMFE
     pred1_model = PredModel_MMFE()
     print(pred1_model)
     model1_path = 'weights_P6/fuse_net_timeEst_a_e100_1_snr0.pth'
-    from FusionPredict_net.Signal_net_EchoOnly_pred_a_1 import PredModel as PredModel_ECHO
+    from Signal_net_EchoOnly_pred_a_1 import PredModel as PredModel_ECHO
     pred2_model = PredModel_ECHO()
     print(pred2_model)
     model2_path = 'weights_P6/echo_net_pred_a_e100_1_snr0.pth'
 
 
-    output_path = '../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0_lotLostEcho09_echo-only.pth'
+    output_path = '../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0_lotLostEcho09_multimodal_2_325.pth'
     test_and_save(right_model, pred1_model, pred2_model,test_loader, device, model1_path, model2_path, output_path)
 
 '''
@@ -225,15 +226,29 @@ if __name__ == "__main__":
      Vision-Only vs 真实值: 0.5051
      Multi-Modal vs 真实值: 0.3806
      Echo-Only vs 真实值: 0.5236
-     snr=-1
      Saved data_P12 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr0_1.pth
      
+     
+     snr=0
+     方位角RMSE计算结果：
+    Vision-Only vs 真实值: 0.5051
+    Multi-Modal vs 真实值: 0.4459
+    Echo-Only vs 真实值: 0.5236
+    Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_noFuse_pred_a_snr0_1.pth
+
      snr=-1
      方位角RMSE计算结果：
      Vision-Only vs 真实值: 0.5051
      Multi-Modal vs 真实值: 0.4210
      Echo-Only vs 真实值: 0.5823
      Saved data_P12 to  ../simulate_data/data_P6/Comparison_MMFE_pred_a_snr-1_1.pth
+     
+     #snr=-1
+     方位角RMSE计算结果：
+    Vision-Only vs 真实值: 0.5051
+    Multi-Modal vs 真实值: 0.5061
+    Echo-Only vs 真实值: 0.5823
+    Saved data_P6 to  ../simulate_data/data_P6/Comparison_MMFE_noFuse_pred_a_snr-1_1.pth
      
      SNR=-2
      方位角RMSE计算结果：

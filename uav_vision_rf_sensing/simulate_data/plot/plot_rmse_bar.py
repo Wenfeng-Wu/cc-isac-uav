@@ -9,33 +9,51 @@ labels = ['Vision-Only',
          'Echo-Only(snr= 0)',
          'Echo-Only(snr=-1)',
          'Echo-Only(snr=-2)',
-         'Multi-Modal(snr= 0)',
-         'Multi-Modal(snr=-1)',
-         'Multi-Modal(snr=-2)',
+         'MMFE(snr= 0)',
+         'MMFE(snr=-1)',
+         'MMFE(snr=-2)',
          'Echo-Only(few error)',
          'Echo-Only(all error)',
-         'Multi-Modal(few error)',
-         'Multi-Modal(lot error)',
+         'MMFE(few error)',
+         'MMFE(lot error)',
+         'KL-based(snr= 0)',
+         'MMFE w/o Fuse(snr= 0)'
          ]
 '''
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-labels = ['a', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3', 'b4', 'b5', 'c4', 'c5']
-az = [0.5051, 0.5236, 0.5823, 0.6467, 0.3806, 0.4210, 0.4580, 0.5315, 0.5388, 0.3832, 0.3832]
-el = [1.6321, 0.7648, 0.7711, 0.8377, 0.7396, 0.7360, 0.7772, 0.7896, 0.8216, 0.7569, 0.7918]
+#labels = ['a', 'b1',   'b2',   'b3',    'c1',   'c2',   'c3', 'd1',    'd2',  'd3',   'e1',  'e2',  'e3',
+#          'b4',   'b5',   'c4',   'c5',   'd4', 'd5', 'e4','e5',
+#          'b6', 'b7', 'b8', 'c6', 'c7', 'c8']
+#az = [0.5051, 0.5236, 0.5823, 0.6467, 0.3806, 0.4210, 0.4580, 0.8405, 0.9943, 1.0806, 0.4459,0.5061,0.5683 ,
+#      0.5315, 0.5388, 0.3831, 0.3832,  0.8300, 0.8023,0.4473,0.4411,
+#      0.5179, 0.5466, 0.5762, 0.3728, 0.3952, 0.4209]
+#el = [1.6321, 0.7648, 0.7711, 0.8377, 0.7396, 0.7360, 0.7772, 0.9369, 1.0568, 1.1561, 0.8276, 0.8261, 0.8598,
+#      0.7896, 0.8216, 0.7569, 0.7523, 0.9270, 0.9231, 0.8422, 0.8290,
+#      0.7813, 0.7886, 0.7761, 0.7702, 0.7523, 0.7230]
+
+labels = ['a', 'b1',   'b2',   'b3',    'c1',   'c2',   'c3', 'd1',    'd2',  'd3',   'e1',  'e2',  'e3',
+          'b4',   'b5',   'c4',   'c5',  'e4','e5',
+          'b6', 'b7', 'b8', 'c6', 'c7', 'c8']
+az = [0.5051, 0.5236, 0.5823, 0.6467, 0.3806, 0.4210, 0.4580, 0.8405, 0.9943, 1.0806, 0.4459,0.5061,0.5683 ,
+      0.5315, 0.5388, 0.3831, 0.3832, 0.4473,0.4411,
+      0.5179, 0.5466, 0.5762, 0.3728, 0.3952, 0.4209]
+el = [1.6321, 0.7648, 0.7711, 0.8377, 0.7396, 0.7360, 0.7772, 0.9369, 1.0568, 1.1561, 0.8276, 0.8261, 0.8598,
+      0.7896, 0.8216, 0.7569, 0.7523, 0.8422, 0.8290,
+      0.7813, 0.7886, 0.7761, 0.7702, 0.7523, 0.7230]
 
 # 自定义参数
 bar_color_az = '#FFBF4C'
 bar_color_el = '#97AF64'
-font_size_title = 18
-font_size_label = 18
-font_size_tick = 18
+font_size_title = 16
+font_size_label = 16
+font_size_tick = 16
 bar_width = 0.8
 
 # 创建画布
-fig = plt.figure(figsize=(6, 7))
+fig = plt.figure(figsize=(10, 7))
 x = np.arange(len(labels))
 
 # 定义坐标轴位置参数（确保对齐）
@@ -59,7 +77,7 @@ ax1.set_xticks(x)
 ax1.set_xticklabels(labels, fontsize=font_size_tick)
 ax1.set_ylabel('RMSE', fontsize=font_size_label)
 ax1.grid(axis='y', linestyle='--', alpha=0.7)
-ax1.set_ylim([0.2, 0.7])
+ax1.set_ylim([0.2, 1.1])
 
 # 绘制Elevation下方轴（0.4-1.0）
 ax2_lower.bar(x, el, width=bar_width, color=bar_color_el)
@@ -67,7 +85,7 @@ ax2_lower.set_xticks(x)
 ax2_lower.set_xticklabels(labels, fontsize=font_size_tick)
 ax2_lower.set_ylabel('RMSE', fontsize=font_size_label)
 ax2_lower.grid(axis='y', linestyle='--', alpha=0.7)
-ax2_lower.set_ylim([0.6, 0.9])  # 下方显示范围
+ax2_lower.set_ylim([0.6, 1.2])  # 下方显示范围
 
 # 绘制Elevation上方轴（1.6-1.7）
 ax2_upper.bar(x, el, width=bar_width, color=bar_color_el)
@@ -82,50 +100,70 @@ ax2_upper.text(0.5, -0.05, '//', ha='center', va='top',
                transform=ax2_upper.transAxes, fontsize=14, fontweight='bold')
 
 plt.tight_layout()
-plt.savefig('fig6.png')
+plt.savefig('fig6.png', dpi=900)
 plt.show()
 
-'''
-这个代码中第二个图需要修改，纵坐标的1.0到1.6能不能折叠起来？
-labels = ['a',   'b1',  'b2',   'b3',  'c1',    'c2',   'c3',  'b4',   'b5',   'c4',   'c5']
-az = [0.5051, 0.5236, 0.5823, 0.6467, 0.3806, 0.4210, 0.4580, 0.5315, 0.5388, 0.3832, 0.3832]
 
-el = [1.6321, 0.7648, 0.7711, 0.8377, 0.7396, 0.7360, 0.7772, 0.7896, 0.8216, 0.7569, 0.7918]
 
-# 自定义参数 - 您可以根据需要修改这些值
-bar_color_az = '#FFBF4C'    # az柱状图颜色
-bar_color_el = '#97AF64'    # el柱状图颜色
-font_size_title = 18        # 标题字体大小
-font_size_label = 18        # 坐标轴标签字体大小
-font_size_tick = 18         # 刻度字体大小
-bar_width = 0.8             # 柱子宽度
+#=====================
 
-# 创建画布和子图
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 6))
-x = np.arange(len(labels))  # 标签位置
+# 创建画布
+fig = plt.figure(figsize=(12,4))
+x = np.arange(len(labels))
 
-# 绘制az柱状图
+# 左右布局
+bottom = 0.15
+lower_h = 0.54
+upper_h = lower_h / 6
+gap = 0.04
+
+height = lower_h + upper_h + gap
+
+# 左侧 Azimuth
+ax1 = fig.add_axes([0.07, bottom, 0.40, height])
+
+# 右侧 Elevation（断裂比例 1:6）
+lower_h = 0.54
+upper_h = lower_h / 6
+gap = 0.04
+
+ax2_lower = fig.add_axes([0.55, bottom, 0.40, lower_h])
+ax2_upper = fig.add_axes([0.55, bottom + lower_h + gap, 0.40, upper_h], sharex=ax2_lower)
+
+plt.setp(ax2_upper.get_xticklabels(), visible=False)
+
+# ---------------- Azimuth ----------------
 ax1.bar(x, az, width=bar_width, color=bar_color_az)
 ax1.set_title('Azimuth', fontsize=font_size_title)
 ax1.set_xticks(x)
-ax1.set_xticklabels(labels,  fontsize=font_size_tick)
+ax1.set_xticklabels(labels, fontsize=font_size_tick, rotation=90)
 ax1.set_ylabel('RMSE', fontsize=font_size_label)
 ax1.grid(axis='y', linestyle='--', alpha=0.7)
-ax1.set_ylim([0.2, 1.2])
+ax1.set_ylim([0.2, 1.1])
 
-# 绘制el柱状图
-ax2.bar(x, el, width=bar_width, color=bar_color_el)
-ax2.set_title('Elevation', fontsize=font_size_title)
-ax2.set_xticks(x)
-ax2.set_xticklabels(labels,  fontsize=font_size_tick)
-ax2.set_ylabel('RMSE', fontsize=font_size_label)
-ax2.grid(axis='y', linestyle='--', alpha=0.7)
-ax2.set_ylim([0.4, 1.7])
+# ---------------- Elevation lower ----------------
+ax2_lower.bar(x, el, width=bar_width, color=bar_color_el)
+ax2_lower.set_xticks(x)
+ax2_lower.set_xticklabels(labels, fontsize=font_size_tick, rotation=90)
+ax2_lower.grid(axis='y', linestyle='--', alpha=0.7)
+ax2_lower.set_ylim([0.6, 1.2])
 
-# 调整布局，避免文字重叠
-plt.tight_layout()
+# ---------------- Elevation upper ----------------
+ax2_upper.bar(x, el, width=bar_width, color=bar_color_el)
+ax2_upper.set_title('Elevation', fontsize=font_size_title)
+ax2_upper.grid(axis='y', linestyle='--', alpha=0.7)
+ax2_upper.set_ylim([1.6, 1.7])
 
-plt.savefig('fig6.png')
-# 显示图形
+# 断裂标记
+ax2_lower.text(0.5, 1.02, '//', ha='center', va='bottom',
+               transform=ax2_lower.transAxes, fontsize=14, fontweight='bold')
+
+ax2_upper.text(0.5, -0.08, '//', ha='center', va='top',
+               transform=ax2_upper.transAxes, fontsize=14, fontweight='bold')
+
+# Elevation整体RMSE标签（居中）
+fig.text(0.515, bottom + height/2, 'RMSE',
+         rotation=90, va='center', ha='center', fontsize=font_size_label)
+
+plt.savefig('fig6.png', dpi=900)
 plt.show()
-'''

@@ -16,9 +16,9 @@ def load_and_unpack(file_name):
     """一次性加载并拆包 checkpoint"""
     load_path = os.path.join(parent_dir, 'data_P6', file_name)
     print(load_path)
-    ckpt = torch.load(load_path)
-    model_path = ckpt['model']['model_path']
-    print("data_P6 from", model_path)
+    ckpt = torch.load(load_path, weights_only=False)
+    #model_path = ckpt['model']['model_path']
+    #print("data_P6 from", model_path)
     return ckpt['results']
 
 
@@ -30,7 +30,7 @@ def mse(a, b):
 
 #======================= 画图函数 ========================================================================================
 
-def plot_cdf_focused(ax, data_list, colors, lines, labels, xlabel, title=None, rmse_text=None,
+def plot_cdf_focused(ax, data_list, colors, lines, labels, markers, xlabel, title=None, rmse_text=None,
                      focus_percentile=95, x_padding=0.05):
     # 计算所有数据集中最小的95%分位数
     min_p95 = min(np.percentile(data, focus_percentile) for data in data_list)
@@ -43,20 +43,20 @@ def plot_cdf_focused(ax, data_list, colors, lines, labels, xlabel, title=None, r
     ax.set_ylim(0, 1.0)
 
     # 绘制CDF曲线
-    for data, color, label, line in zip(data_list, colors, labels, lines):
+    for data, color, label, line, marker in zip(data_list, colors, labels, lines, markers):
         # 计算CDF
         sorted_data = np.sort(data)
         cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
 
         # 绘制CDF曲线
-        sns.lineplot(x=sorted_data, y=cdf,  linestyle=line, color=color, ax=ax, linewidth=3, legend=False)
+        sns.lineplot(x=sorted_data, y=cdf,  linestyle=line, color=color, ax=ax, linewidth=2, legend=False, marker=marker, markevery=400)
 
     # 设置图表属性
-    ax.set_xlabel(xlabel, fontsize=20)
-    ax.set_ylabel('CPF', fontsize=20)
+    ax.set_xlabel(xlabel, fontsize=16)
+    ax.set_ylabel('CPF', fontsize=16)
     #ax.legend(fontsize=16)
     # 同时设置X轴和Y轴刻度标签字体大小
-    ax.tick_params(axis='both', labelsize=20)
+    ax.tick_params(axis='both', labelsize=16)
     ax.grid(True, linestyle='--', alpha=0.7)
 
     if title:
@@ -158,6 +158,20 @@ if __name__ == "__main__":
     az_diff_vision_true = [abs(x) for x in r0['az_diff_vision_true']]
     az_diff_echoOnly_true = [abs(x) for x in r0['az_diff_echo_true']]
 
+    r0 = load_and_unpack('Comparison_KL_pred_ab_snr0_1.pth')
+    az_diff_klpred_true = r0['az_diff_pred_true']
+    az_klpred = r0['az_pred']
+    el_diff_klpred_true = r0['el_diff_pred_true']
+    el_klpred = r0['el_pred']
+
+    r0 = load_and_unpack('Comparison_MMFE_noFuse_pred_a_snr0_1.pth')
+    az_diff_noFusepred_true = r0['az_diff_pred_true']
+    az_noFusepred = r0['az_pred']
+
+    r0 = load_and_unpack('Comparison_MMFE_noFuse_pred_b_snr0_1.pth')
+    el_diff_noFusepred_true = r0['el_diff_pred_true']
+    el_noFusepred = r0['el_pred']
+
     r0 = load_and_unpack('Comparison_MMFE_pred_b_snr0.pth')
     el_true = r0['el_true']
     el_pred1 = r0['el_pred']
@@ -177,6 +191,11 @@ if __name__ == "__main__":
     az_mse_echoOnly_true = mse(az_echoOnly, az_true)
     el_mse_echoOnly_true = mse(el_echoOnly, el_true)
 
+    az_mse_klpred_true = mse(az_klpred, az_true)
+    el_mse_klpred_true = mse(el_klpred, el_true)
+    az_mse_noFusepred_true = mse(az_noFusepred, az_true)
+    el_mse_noFusepred_true = mse(el_noFusepred, el_true)
+
     print("\n".join([
         f"MMFE  Azimuth MSE: {format_scientific(az_mse_pred1_true)}",
         f"MMFE  Elevation MSE: {format_scientific(el_mse_pred1_true)}"
@@ -184,6 +203,10 @@ if __name__ == "__main__":
         f"V2EDA Elevation MSE: {format_scientific(el_mse_vision_true)}",
         f"Echo-Only Azimuth MSE: {format_scientific(az_mse_echoOnly_true)}",
         f"Echo-Only Elevation MSE: {format_scientific(el_mse_echoOnly_true)}"
+        f"MMFE wo Fuse Azimuth MSE:{format_scientific(az_mse_noFusepred_true)}",
+        f"MMFE wo Fuse Elevation MSE:{format_scientific(el_mse_noFusepred_true)}",
+        f"KL Azimuth MSE: {format_scientific(az_mse_klpred_true)}",
+        f"KL Elevation MSE: {format_scientific(el_mse_klpred_true)}"
 
     ]))
 
@@ -191,21 +214,21 @@ if __name__ == "__main__":
 
     # 定义颜色和标签方案
     plot_config = {
-        'colors': ['#FFA500', '#6B8E23', '#008080'],
-        'labels': ['Multimodal', 'Echo-Only', 'Vision-Only'],
-        'line_styles': ['-', '--', '-.'],
-        'markers': ['o', 'x', '.']
+        'colors': ['#FFA500', '#6B8E23', '#008080', '#FFB6C1', '#DB7093'],
+        'labels': ['MMFE', 'Echo-Only', 'Vision-Only', 'KF-Based', 'MMFE w/o Fuse'],
+        'line_styles': ['-', '--', '-.', ':', '--'],
+        'markers': ['None', 'None', 'None', 's', 'o']
     }
 
-    az_data = [az_diff_pred1_true, az_diff_echoOnly_true, az_diff_vision_true]
+    az_data = [az_diff_pred1_true, az_diff_echoOnly_true, az_diff_vision_true, az_diff_klpred_true, az_diff_noFusepred_true]
     az_data = [[abs(x * 0.017453293) for x in sublist] for sublist in az_data]
-    el_data = [el_diff_pred1_true, el_diff_echoOnly_true, el_diff_vision_true]
+    el_data = [el_diff_pred1_true, el_diff_echoOnly_true, el_diff_vision_true, el_diff_klpred_true, el_diff_noFusepred_true]
     el_data = [[abs(x * 0.017453293) for x in sublist] for sublist in el_data]
 
-    print("mse : ", mean(az_diff_pred1_true))
-    print("mse : ", mean(el_diff_pred1_true))
-    print("mse : ", mean(az_diff_echoOnly_true))
-    print("mse : ", mean(el_diff_echoOnly_true))
+    #print("mse : ", mean(az_diff_pred1_true))
+    #print("mse : ", mean(el_diff_pred1_true))
+    #print("mse : ", mean(az_diff_echoOnly_true))
+    #print("mse : ", mean(el_diff_echoOnly_true))
 
     # ==================== 箱线图 ====================
     import numpy as np
@@ -218,7 +241,7 @@ if __name__ == "__main__":
     # 计算箱线图位置
     positions, data_all, colors_all = [], [], []
     start = 0.5
-    for grp, cols in [(az_data, 3), (el_data, 3)]:
+    for grp, cols in [(az_data, 5), (el_data, 5)]:
         pos = [start + inner_gap * i for i in range(cols)]
         positions.extend(pos)
         data_all.extend(grp)
@@ -233,8 +256,8 @@ if __name__ == "__main__":
                      markeredgecolor='black',
                      markersize=4)
     # 画箱线图：Az/El 用左轴，d 用右轴
-    bplot = ax_left.boxplot(data_all[:6],
-                            positions=positions[:6],
+    bplot = ax_left.boxplot(data_all[:10],
+                            positions=positions[:10],
                             widths=box_width,
                             patch_artist=True,
                             showfliers=False,  # 1. 显示异常值
@@ -250,7 +273,7 @@ if __name__ == "__main__":
     # 坐标轴 & 标签
     ax_left.tick_params(labelsize=18)
     # ax_right.tick_params(labelsize=18)
-    ax_left.set_xticks([np.mean(positions[i:i + 2 if i < 6 else i + 2]) for i in [0, 3]])
+    ax_left.set_xticks([np.mean(positions[i:i + 5 if i < 6 else i + 5]) for i in [0, 5]])
     ax_left.set_xticklabels(['Azimuth', 'Elevation'], fontsize=20)
     ax_left.set_ylabel('Angle Error (rad)', color='black', fontsize=20)
     # ax_right.set_ylabel('Distance Error (m)', color='black', fontsize=20)
@@ -261,7 +284,7 @@ if __name__ == "__main__":
     legend_elements = [Line2D([0], [0],
                               color=c, label=l, linestyle=ls, alpha=0.7)
                        for c, l, ls in
-                       zip(plot_config['colors'][:3], plot_config['labels'], plot_config['line_styles'])]
+                       zip(plot_config['colors'][:5], plot_config['labels'], plot_config['line_styles'])]
     ax_left.legend(handles=legend_elements, loc='upper left', fontsize=18)
 
     # ax_left.set_title('Error Distribution Comparison')
@@ -273,18 +296,18 @@ if __name__ == "__main__":
     # =============分开的箱线图
 
     # 布局参数
-    inner_gap = 0.2  # 组内间隔
-    box_width = 0.2
+    inner_gap = 0.3  # 组内间隔
+    box_width = 0.3
     start_pos = 0.5  # 起始位置
 
     # 分别计算方位角和仰角的箱线图位置与数据
     # 方位角(Azimuth)数据处理
-    az_cols = 3
+    az_cols = 5
     az_positions = [start_pos + inner_gap * i for i in range(az_cols)]
     az_colors = plot_config['colors'][:az_cols]
 
     # 仰角(Elevation)数据处理
-    el_cols = 3
+    el_cols = 5
     el_positions = [start_pos + inner_gap * i for i in range(el_cols)]
     el_colors = plot_config['colors'][:el_cols]
 
@@ -322,7 +345,7 @@ if __name__ == "__main__":
     # 方位角图例
     legend_elements = [Line2D([0], [0],
                               color=c, label=l, linestyle=ls, alpha=0.7)
-                       for c, l, ls in zip(plot_config['colors'][:3],
+                       for c, l, ls in zip(plot_config['colors'][:5],
                                            plot_config['labels'],
                                            plot_config['line_styles'])]
     # ax_az.legend(handles=legend_elements, loc='upper left', fontsize=18)
@@ -375,6 +398,7 @@ if __name__ == "__main__":
         plot_config['colors'],
         plot_config['line_styles'],
         plot_config['labels'],
+        plot_config['markers'],
         'Azimuth Error (rad)',
         # rmse_text=az_rmse
     )
@@ -383,7 +407,7 @@ if __name__ == "__main__":
     plt.subplots_adjust(left=0.4)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     # plt.legend(handles=legend_elements, loc='lower right', fontsize=18)
-    axes.legend(handles=legend_elements, loc='lower right', fontsize=18, bbox_to_anchor=(1, 0), frameon=True)
+    axes.legend(handles=legend_elements, loc='lower right', fontsize=12, bbox_to_anchor=(1, 0), frameon=True)
     # 保存图像
     plt.subplots_adjust(
         # left=0.4,      # 左侧边距
@@ -405,6 +429,7 @@ if __name__ == "__main__":
         plot_config['colors'],
         plot_config['line_styles'],
         plot_config['labels'],
+        plot_config['markers'],
         'Elevation Error (rad)',
         # rmse_text=el_rmse
     )
@@ -413,7 +438,7 @@ if __name__ == "__main__":
     plt.subplots_adjust(left=0.4)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     # plt.legend(handles=legend_elements, loc='lower right', fontsize=18)
-    axes.legend(handles=legend_elements, loc='lower right', fontsize=18, bbox_to_anchor=(1, 0), frameon=True)
+    axes.legend(handles=legend_elements, loc='lower right', fontsize=12, bbox_to_anchor=(1, 0), frameon=True)
     # 保存图像
     plt.subplots_adjust(
         # left=0.4,      # 左侧边距
@@ -427,9 +452,9 @@ if __name__ == "__main__":
     plt.savefig(save_path, dpi=900, bbox_inches='tight')
     print(f"综合分析图已保存至: {save_path}")
     plt.show()
-    plot_topk_line(az_vision, el_vision, az_true, el_true, 'fig10.png')
-    plot_topk_line(az_pred1, el_pred1, az_true, el_true, 'fig101.png')
-    plot_topk_line(az_echoOnly, el_echoOnly, az_true, el_true, 'fig102.png')
+    #plot_topk_line(az_vision, el_vision, az_true, el_true, 'fig10.png')
+    #plot_topk_line(az_pred1, el_pred1, az_true, el_true, 'fig101.png')
+    #plot_topk_line(az_echoOnly, el_echoOnly, az_true, el_true, 'fig102.png')
     '''
     vision_topk = (plot_topk(az_vision, el_vision, az_true, el_true))
     echo_topk = (plot_topk(az_echoOnly, el_echoOnly, az_true, el_true))

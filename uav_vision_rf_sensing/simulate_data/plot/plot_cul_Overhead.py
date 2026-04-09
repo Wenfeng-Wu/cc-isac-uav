@@ -53,12 +53,21 @@ az_diff_echoOnly_true = [abs(x) for x in r0['az_diff_echo_true']]
 
 r0 = load_and_unpack('Comparison_MMFE_pred_b_snr0_lotLostEcho09.pth')
 el_true = r0['el_true']
-el_pred1 =  r0['el_pred']
+#el_pred1 =  r0['el_pred']
 el_vision =  r0['el_vision']
 el_echoOnly = r0['el_echo']
-el_diff_pred1_true = [abs(x) for x in r0['el_diff_pred_true']]
+#el_diff_pred1_true = [abs(x) for x in r0['el_diff_pred_true']]
 el_diff_vision_true = [abs(x) for x in r0['el_diff_vision_true']]
 el_diff_echoOnly_true = [abs(x) for x in r0['el_diff_echo_true']]
+
+r0 = load_and_unpack('Comparison_MMFE_pred_b_snr0_lotLostEcho09_2.pth')
+#el_true = r0['el_true']
+el_pred1 =  r0['el_pred']
+#el_vision =  r0['el_vision']
+#el_echoOnly = r0['el_echo']
+el_diff_pred1_true = [abs(x) for x in r0['el_diff_pred_true']]
+#el_diff_vision_true = [abs(x) for x in r0['el_diff_vision_true']]
+#el_diff_echoOnly_true = [abs(x) for x in r0['el_diff_echo_true']]
 
 print('===============================vision===============================')
 vision_topk, vision_times = (print_topk(az_vision, el_vision, az_true, el_true))

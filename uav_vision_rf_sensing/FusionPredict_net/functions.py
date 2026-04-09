@@ -107,12 +107,171 @@ def set_INOUT_data(batch, model, device):
 
     mask_2 = torch.ones(B, N, 4)
     mask_2[:, -1, :] = 0
+    mask_2 = mask_2.to(device)
 
     output_vision_est = torch.cat([est_vision_az, est_vision_el, est_vision_dis, est_vision_v], dim=-1)
     output_true = torch.cat([true_az, true_el, true_dis, true_v], dim=-1)
     output_echo_esti = torch.cat([est_echo_az, est_echo_el, est_echo_dis, est_echo_v], dim=-1) * mask_2
 
     return output_vision_est, output_echo_esti, output_true[:,-1,:].unsqueeze(1)
+
+
+def set_INOUT_data_timeOffset(batch, model, device):
+
+    # 提取batch数据
+    images = batch['mask_images'].to(device)
+    boxs = batch['target_boxs'].to(device)
+    bs_coors_true = batch['uav_bs_coors_true'].to(device)
+    echo_coors_esti = batch['uav_echo_coors_esti'].to(device)
+
+    # 获取 batch size 和时间步数
+    B, N = images.shape[0], images.shape[1]
+
+    # Flatten 操作，将 (B, N) 合并为一个维度，得到 (B*N, ...)
+    images_flat = torch.flatten(images, start_dim=0, end_dim=1)  # shape: (B*N, C, H, W)
+    box_flat = torch.flatten(boxs, start_dim=0, end_dim=1)  # shape: (B*N, 4)
+    bs_coor_flat = torch.flatten(bs_coors_true, start_dim=0, end_dim=1)  # shape: (B*N, 4)
+    echo_coord_flat = torch.flatten(echo_coors_esti, start_dim=0, end_dim=1)  # shape: (B*N, 4)
+
+    # 模型推理,计算vision预测的uav参数
+    with torch.no_grad():
+        outputs = model(images_flat, box_flat[:,0:2], box_flat[:,2:4])
+        est_vision_output = model.denormalize_output(outputs)
+
+    # 处理图像预测的abdv参数 到 BN4, 并归一化
+    est_vision_az = est_vision_output[:,0].view(B, N, -1)  # shape: (B, N, Z)
+    est_vision_el = est_vision_output[:,1].view(B, N, -1)
+    est_vision_dis = torch.zeros_like(est_vision_az)
+    est_vision_v = torch.zeros_like(est_vision_az)
+
+    est_vision_az = normalize_azimuth(est_vision_az)
+    est_vision_el = normalize_elevation(est_vision_el)
+
+
+    # 处理真实的abdv参数到 BN4， 并归一化
+    true_az = bs_coor_flat[:,0].view(B, N, -1)  # shape: (B, N, Z)
+    true_el = bs_coor_flat[:,1].view(B, N, -1)
+    true_dis = bs_coor_flat[:,2].view(B, N, -1)
+    true_v = bs_coor_flat[:,3].view(B, N, -1)
+
+    true_az = normalize_azimuth(true_az)   # 110-150
+    true_el = normalize_elevation(true_el)  # 10-80
+    true_dis = normalize_distance(true_dis)  # 0-1
+
+    # 处理echo估计的abdv参数，并归一化
+    est_echo_az = normalize_azimuth(echo_coord_flat[:,0])
+    est_echo_el = normalize_elevation(echo_coord_flat[:,1])
+    est_echo_dis = normalize_distance(echo_coord_flat[:,2])
+
+    est_echo_az = est_echo_az.view(B, N, -1)
+    est_echo_el = est_echo_el.view(B, N, -1)
+    est_echo_dis = est_echo_dis.view(B, N, -1)
+    est_echo_v = echo_coord_flat[:,3].view(B, N, -1)
+
+    mask_2 = torch.ones(B, N, 4)
+    mask_2[:, -1, :] = 0
+    mask_2 = mask_2.to(device)
+
+    output_vision_est = torch.cat([est_vision_az, est_vision_el, est_vision_dis, est_vision_v], dim=-1)
+    output_true = torch.cat([true_az, true_el, true_dis, true_v], dim=-1)
+    output_echo_esti = torch.cat([est_echo_az, est_echo_el, est_echo_dis, est_echo_v], dim=-1) * mask_2
+
+    # ======================== 关键修改：添加偏差逻辑 ========================
+    #offtype='delay'
+    offtype='ahead'
+    #offtype='both'
+
+    if offtype=='delay':
+        # 1. 复制原始echo估计值，避免修改原数据
+        output_echo_esti_with_noise = output_echo_esti.clone()
+
+        # 2. 遍历时间步（除最后一个，因为mask_2已将最后一个置0）
+        for t in range(N - 1):
+            # 处理前5个时间步（t=0到4）：第t个时间步由t+1个时间步决定
+            if t < 5:
+                # 获取当前时间步和下一个时间步的原始值
+                current_val = output_echo_esti[:, t, :]  # 第t个时间步 (B, 4)
+                next_val = output_echo_esti[:, t + 1, :]  # 第t+1个时间步 (B, 4)
+
+                # 计算(b-a)/2
+                delta_half = (next_val - current_val) / 4  # (B, 4)
+
+                # 生成0到delta_half之间的随机数c（支持正负）
+                # 逻辑：random * abs(delta_half) * sign(delta_half)
+                random_factor = torch.rand_like(delta_half)  # 0~1的随机数
+                c = random_factor * torch.abs(delta_half) * torch.sign(delta_half)
+
+                # 给当前时间步添加偏差：a + c
+                output_echo_esti_with_noise[:, t, :] = current_val + c
+
+            # 处理第6个时间步（t=5）：和第5个时间步（t=4）的偏差幅度一致
+            elif t == 5:
+                # 获取第5个时间步的偏差幅度
+                t4_original = output_echo_esti[:, 4, :]
+                t4_noised = output_echo_esti_with_noise[:, 4, :]
+                delta_t4 = t4_noised - t4_original  # 第5个时间步的偏差量
+
+                # 第6个时间步应用相同的偏差幅度
+                output_echo_esti_with_noise[:, 5, :] = output_echo_esti[:, 5, :] + delta_t4
+
+        # 替换为添加偏差后的echo估计值
+        output_echo_esti = output_echo_esti_with_noise
+        # ======================== 偏差逻辑结束 ========================
+
+        return output_vision_est, output_echo_esti, output_true[:, -1, :].unsqueeze(1)
+
+    if offtype=='ahead':
+        # 1. 复制原始echo估计值，避免修改原数据
+        output_echo_esti_with_noise = output_echo_esti.clone()
+
+        # 2. 遍历时间步（从第2个开始，t=1到第6个t=5；第1个t=0保持不变）
+        for t in range(1, min(6, N)):  # 只处理到第6个时间点，避免N<6的情况
+            # 获取当前时间步(t)和前一个时间步(t-1)的原始值
+            current_val = output_echo_esti[:, t, :]  # 第t个时间步 (B, 4)
+            prev_val = output_echo_esti[:, t - 1, :]  # 第t-1个时间步 (B, 4)
+
+            # 计算(b-a)/2：这里b是current_val，a是prev_val
+            delta_half = (current_val - prev_val) / 2  # (B, 4)
+
+            # 生成0到delta_half之间的随机数c（支持正负）
+            random_factor = torch.rand_like(delta_half)  # 0~1的随机数
+            c = random_factor * torch.abs(delta_half) * torch.sign(delta_half)
+
+            # 给当前时间步添加偏差：b - c（核心规则变更）
+            output_echo_esti_with_noise[:, t, :] = current_val - c
+
+        # 替换为添加偏差后的echo估计值
+        output_echo_esti = output_echo_esti_with_noise
+        # ======================== 偏差逻辑结束 ========================
+
+        return output_vision_est, output_echo_esti, output_true[:, -1, :].unsqueeze(1)
+
+    if offtype=='both':
+        # 1. 复制原始echo估计值，避免修改原数据
+        output_echo_esti_with_noise = output_echo_esti.clone()
+
+        # 2. 遍历时间步（从第2个开始t=1到第6个t=5；第1个t=0保持不变）
+        for t in range(1, min(6, N)):  # 只处理到第6个时间点，防止N<6越界
+            # 获取当前时间步(t)和前一个时间步(t-1)的原始值
+            current_val = output_echo_esti[:, t, :]  # 第t个时间步 (B, 4)
+            prev_val = output_echo_esti[:, t - 1, :]  # 第t-1个时间步 (B, 4)
+
+            # 计算(b-a)/2：b=current_val(当前值), a=prev_val(前一个值)
+            delta_half = (current_val - prev_val) / 2  # (B, 4)
+
+            # 生成-(b-a)/2 到 (b-a)/2 之间的随机数c
+            # 逻辑：random(-1,1) * delta_half → 等价于 (2*rand-1)*delta_half
+            random_factor = (2 * torch.rand_like(delta_half)) - 1  # 生成-1~1的随机数
+            c = random_factor * delta_half
+
+            # 给当前时间步添加偏差：b + c（核心规则）
+            output_echo_esti_with_noise[:, t, :] = current_val + c
+
+        # 替换为添加偏差后的echo估计值
+        output_echo_esti = output_echo_esti_with_noise
+        # ======================== 偏差逻辑结束 ========================
+
+        return output_vision_est, output_echo_esti, output_true[:, -1, :].unsqueeze(1)
 
 def set_INOUT_data_someError(batch, model, device):
 
@@ -136,9 +295,10 @@ def set_INOUT_data_someError(batch, model, device):
         outputs = model(images_flat, box_flat[:,0:2], box_flat[:,2:4])
         est_vision_output = model.denormalize_output(outputs)
 
-    Etype = 'echo_error_is_last_echo'
+    Etype = 'echo_error_is_vision'
 
     if Etype == 'echo_error_is_last_echo':
+        #mask_prob = 0.2
         mask_prob = 0.9
         if torch.rand(1) < mask_prob:
             # 随机选择一个索引（与原逻辑一致）
@@ -155,6 +315,7 @@ def set_INOUT_data_someError(batch, model, device):
         est_echo_dis = normalize_distance(echo_coord_flat[:, 2])
     elif Etype == 'echo_error_is_vision':
         mask_prob = 0.2  # 2%的概率触发误差
+        mask_prob = 0.9  # 2%的概率触发误差
         if torch.rand(1) < mask_prob:
             # 随机选择一个索引（与原逻辑一致）
             mask_idx = torch.randint(0, echo_coord_flat.shape[0], (1,))  # 修正索引范围为回声数据长度

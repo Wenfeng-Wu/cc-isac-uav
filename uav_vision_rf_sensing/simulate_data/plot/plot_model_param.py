@@ -94,7 +94,7 @@ if __name__ == '__main__':
     full_report(net1, inputs1)
 
     # 2. fuse_net_VisionFirstCome_pred_ab_nores（两输入）
-    from FusionPredict_net.fuse_net_VisionFirstCome_pred_a_1 import PredModel
+    from FusionPredict_net import PredModel
     print("\n[VisionFirst Fuse]")
     net2 = PredModel()
     inputs2 = (torch.randn(1, 7, 2),
@@ -108,3 +108,11 @@ if __name__ == '__main__':
     inputs3 = (#torch.randn(1, 7, 2),
                torch.randn(1, 1, 7, 3))
     full_report(net3, inputs3)
+
+
+    from FusionPredict_net import PredA_NoFuseNet
+    print("\n[VisionFirst But No Fuse]")
+    net2 = PredA_NoFuseNet()
+    inputs2 = (torch.randn(1, 7, 2),
+               torch.randn(1, 7, 3))
+    full_report(net2, inputs2)

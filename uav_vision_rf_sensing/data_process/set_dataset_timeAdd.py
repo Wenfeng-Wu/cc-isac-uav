@@ -147,11 +147,11 @@ def uav_dataset_set(n_timesteps=7):
     ]
 
     dataset = UAVDatasetLSTM(
-        mask_dir=r"D:\Feng_Feng\dataset\uav_gps_beam_process\uav_only",
-        bs_coord_base_dir=r"D:\Feng_Feng\dataset\uav_gps_beam_process\uav_bs_coordinate_bearing{bearing}_dis{dis}",
-        bs_echo_dir=r"D:\Feng_Feng\dataset\uav_gps_beam_process\uav_bs_echo_timeAdd_coor_bearing{bearing}_dis{dis}",
-        cam_coord_base_dir=r"D:\Feng_Feng\dataset\uav_gps_beam_process\uav_cam_coordinate",
-        box_dir=r"D:\Feng_Feng\dataset\uav_gps_beam\scenario23_dev\resources\bbox_labels_final",
+        mask_dir=r"C:/FengFeng/wfwuCode/uav_vision_assisted/dataset\uav_gps_beam_process\uav_only",
+        bs_coord_base_dir=r"C:/FengFeng/wfwuCode/uav_vision_assisted/dataset\uav_gps_beam_process\uav_bs_coordinate_bearing{bearing}_dis{dis}",
+        bs_echo_dir=r"C:/FengFeng/wfwuCode/uav_vision_assisted/dataset\uav_gps_beam_process\uav_bs_echo_timeAdd_coor_bearing{bearing}_dis{dis}",
+        cam_coord_base_dir=r"C:/FengFeng/wfwuCode/uav_vision_assisted/dataset\uav_gps_beam_process\uav_cam_coordinate",
+        box_dir=r"C:/FengFeng/wfwuCode/uav_vision_assisted/dataset\uav_gps_beam\scenario23_dev\resources\bbox_labels_final",
         device_envs=device_envs,
         n_timesteps=n_timesteps,  # 每个包包含n个时间戳
         transform=transforms.Compose([

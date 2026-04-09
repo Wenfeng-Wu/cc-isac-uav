@@ -343,19 +343,19 @@ if __name__ == "__main__":
     # 设置参数
     device = 'cpu'  # torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model_path = 'weights/vision_net_est_ab_no_ic_e100.pth'
-    output_path = '../simulate_data/data_P6/vision_net_est_ab_no_ic.pth'
+    output_path = '../simulate_data/data_P6/vision_net_est_ab_no_ic_325.pth'
     epoch = 100
 
-    from uav_vision_assisted.uav_vision_rf_sensing.data_process import uav_dataset_set_uavonly
+    from uav_vision_rf_sensing.data_process import uav_dataset_set_uavonly
     train_loader, test_loader = uav_dataset_set_uavonly()
     print("dataset load")
 
     # 训练并保存最佳模型
     import time
     s1 = time.time()
-    train_model(model, train_loader, test_loader, device, save_path=model_path, epochs=epoch, lr=0.5e-4)
+    #train_model(model, train_loader, test_loader, device, save_path=model_path, epochs=epoch, lr=0.5e-4)
     e1= time.time()
     print("training time : ", (e1-s1)/60)
     # 载入保存的模型进行测试
-    test_and_save(model, train_loader, device, model_path, output_path)
+    test_and_save(model, test_loader, device, model_path, output_path)
 
