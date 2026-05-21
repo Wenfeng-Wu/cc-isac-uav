@@ -95,11 +95,11 @@ if __name__ == "__main__":
     parent_dir = os.path.dirname(current_dir)
     load_path = os.path.join(parent_dir, 'data_P6', 'vision_net_est_ab_new_325.pth')  # 波束训练阶段的，vision2ab
     load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_ab_no_ic_325.pth')  # 波束训练阶段的，vision2ab
-    # load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_plusInCA_ab_new.pth')  # 波束训练阶段的，vision2ab
-    # load_path2 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_Concat_ab_new.pth')  # 波束训练阶段的，vision2ab
+    load_path3 = os.path.join(parent_dir, 'data_P6', 'vision_net_est_Concat_ab_new.pth')  # 波束训练阶段的，vision2ab
 
     az_diff, el_diff, az_nmse_db, el_nmse_db, = process_vision_data(load_path)
     az_diff2, el_diff2, az_nmse_db2, el_nmse_db2, = process_vision_data(load_path2)
+    az_diff3, el_diff3, az_nmse_db3, el_nmse_db3, = process_vision_data(load_path3)
 
     import matplotlib.pyplot as plt
     import seaborn as sns
@@ -109,11 +109,16 @@ if __name__ == "__main__":
 
     # ==================== 方位角误差直方图 ====================
     plt.figure(figsize=(8, 3))
-    bins = np.linspace(-0.1, 0.1, 50)
-    #bins=100
-    sns.histplot(az_diff, bins=bins, color='#6B8E23', alpha=0.6, kde=True, stat='probability', label='V2EDA')
-    sns.histplot(az_diff2, bins=bins, color='#FFA500', alpha=0.3, kde=True, stat='probability',
-                 label='V2EDA w/o $i_c $', line_kws={'linestyle': '--'})
+    #bins = np.linspace(-0.1, 0.1, 25)
+    all_az = np.concatenate([az_diff, az_diff2])
+    bins = np.linspace(all_az.min(), all_az.max(), 100)
+    bins2 = np.linspace(all_az.min(), all_az.max(), 50)
+    bins3 = np.linspace(all_az.min(), all_az.max(), 50)
+    sns.histplot(az_diff, bins=bins, color='#6B8E23', alpha=0.5, kde=True, stat='probability', label='V2EDA')
+    sns.histplot(az_diff2, bins=bins2, color='#FFA500', alpha=0.2, kde=True, stat='probability',
+                 label='V2EDA w/o $i_c$', line_kws={'linestyle': '--'})
+    sns.histplot(az_diff3, bins=bins3, color='#FFB6C1', alpha=0.1, kde=True, stat='probability',
+                 label='V2EDA w/o Fusion', line_kws={'linestyle': '-.'})
     #plt.title(f'Azimuth Error\\\\\\\\n(MSE = {az_rmse_str})')
     plt.xlabel('Error (rad)', fontsize=18)
     plt.ylabel('Frequency', fontsize=18)
@@ -121,20 +126,32 @@ if __name__ == "__main__":
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.subplots_adjust(left=0.1)
     plt.subplots_adjust(bottom=0.2)
-    plt.xlim(-0.1, 0.1)
-    plt.ylim(0, 0.2)
+    plt.xlim(-0.2, 0.2)
+    plt.ylim(0, 0.25)
+
+    text_az = f'NMSE: {az_nmse_db:.2f} dB\nNMSE: {az_nmse_db2:.2f} dB\nNMSE: {az_nmse_db3:.2f} dB'
+    plt.text(0.02, 0.90, text_az, transform=plt.gca().transAxes, fontsize=16,
+             verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8,
+                   edgecolor='gray', linewidth=0.2))
 
     # 保存第一个图像
-    save_path1 = os.path.join(current_dir, 'fig1_2.png')
+    plt.subplots_adjust(right=0.98)
+    save_path1 = os.path.join(current_dir, 'fig1.png')
     plt.savefig(save_path1, dpi=900, bbox_inches='tight')
     print(f"方位角误差直方图已保存至: {save_path1}")
     plt.show()
 
     # ==================== 仰角误差直方图 ====================
     plt.figure(figsize=(8, 3))
-    sns.histplot(el_diff, bins=bins, color='#6B8E23', alpha=0.6, kde=True, stat='probability', label='V2EDA')
-    sns.histplot(el_diff2, bins=bins, color='#FFA500', alpha=0.3, kde=True, stat='probability',
-                 label='V2EDA with contant', line_kws={'linestyle': '--'})
+    all_az = np.concatenate([el_diff, el_diff2])
+    bins = np.linspace(all_az.min(), all_az.max(), 100)
+    bins2 = np.linspace(all_az.min(), all_az.max(), 50)
+    bins3 = np.linspace(all_az.min(), all_az.max(), 50)
+    sns.histplot(el_diff, bins=bins, color='#6B8E23', alpha=0.5, kde=True, stat='probability', label='V2EDA')
+    sns.histplot(el_diff2, bins=bins2, color='#FFA500', alpha=0.2, kde=True, stat='probability',
+                 label='V2EDA w/o $i_c$', line_kws={'linestyle': '--'})
+    sns.histplot(el_diff3, bins=bins3, color='#FFB6C1', alpha=0.1, kde=True, stat='probability',
+                 label='V2EDA w/o Fusion', line_kws={'linestyle': '-.'})
     #plt.title(f'Elevation Error\\\\\\\\n(MSE = {el_rmse_str})')
     plt.xlabel('Error (rad)', fontsize=18)
     plt.ylabel('Frequency', fontsize=18)
@@ -142,12 +159,16 @@ if __name__ == "__main__":
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.subplots_adjust(left=0.1)
     plt.subplots_adjust(bottom=0.2)
-    plt.xlim(-0.2, 0.2)
-    plt.ylim(0, 0.1)
+    plt.xlim(-0.7, 0.7)
+    plt.ylim(0, 0.25)
 
-
+    text_el = f'NMSE: {el_nmse_db:.2f} dB\nNMSE: {el_nmse_db2:.2f} dB\nNMSE: {el_nmse_db3:.2f} dB'
+    plt.text(0.02, 0.90, text_el, transform=plt.gca().transAxes, fontsize=16,
+             verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8,
+                   edgecolor='gray', linewidth=0.2))
     # 保存第二个图像
-    save_path2 = os.path.join(current_dir, 'fig2_2.png')
+    plt.subplots_adjust(right=0.98)
+    save_path2 = os.path.join(current_dir, 'fig2.png')
     plt.savefig(save_path2, dpi=900, bbox_inches='tight')
     print(f"仰角误差直方图已保存至: {save_path2}")
     plt.show()

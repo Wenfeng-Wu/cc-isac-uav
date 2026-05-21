@@ -1,4 +1,4 @@
-from fuse_net_VisionFirstCome_pred_a_1 import PredModel as PredA_Net
+from fuse_net_VisionFirstCome_pred_a_1 import PredModel #as PredA_Net
 from fuseNo_net_VisionFirstCome_pred_a_1 import PredModel as PredA_NoFuseNet
 from fuse_net_VisionFirstCome_pred_b_1 import PredModel as PredB_Net
 from fuseNo_net_VisionFirstCome_pred_b_1 import PredModel as PredB_NoFuseNet
