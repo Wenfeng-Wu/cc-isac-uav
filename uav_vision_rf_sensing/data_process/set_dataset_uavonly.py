@@ -196,4 +196,5 @@ def uav_dataset_set():
 
     return train_loader, test_loader
 
-uav_dataset_set()
+if __name__ == "__main__":
+    uav_dataset_set()

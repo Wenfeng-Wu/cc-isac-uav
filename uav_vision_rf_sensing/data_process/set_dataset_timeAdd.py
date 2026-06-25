@@ -192,4 +192,5 @@ def uav_dataset_set(n_timesteps=7):
         break
     return train_loader, test_loader
 
-uav_dataset_set()
+if __name__ == "__main__":
+    uav_dataset_set()

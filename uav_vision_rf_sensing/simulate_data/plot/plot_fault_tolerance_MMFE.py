@@ -24,16 +24,6 @@ labels = ['Vision-Only',
 import numpy as np
 import matplotlib.pyplot as plt
 
-#labels = ['a', 'b1',   'b2',   'b3',    'c1',   'c2',   'c3', 'd1',    'd2',  'd3',   'e1',  'e2',  'e3',
-#          'b4',   'b5',   'c4',   'c5',   'd4', 'd5', 'e4','e5',
-#          'b6', 'b7', 'b8', 'c6', 'c7', 'c8']
-#az = [0.5051, 0.5236, 0.5823, 0.6467, 0.3806, 0.4210, 0.4580, 0.8405, 0.9943, 1.0806, 0.4459,0.5061,0.5683 ,
-#      0.5315, 0.5388, 0.3831, 0.3832,  0.8300, 0.8023,0.4473,0.4411,
-#      0.5179, 0.5466, 0.5762, 0.3728, 0.3952, 0.4209]
-#el = [1.6321, 0.7648, 0.7711, 0.8377, 0.7396, 0.7360, 0.7772, 0.9369, 1.0568, 1.1561, 0.8276, 0.8261, 0.8598,
-#      0.7896, 0.8216, 0.7569, 0.7523, 0.9270, 0.9231, 0.8422, 0.8290,
-#      0.7813, 0.7886, 0.7761, 0.7702, 0.7523, 0.7230]
-
 labels = ['a', 'b1',   'b2',   'b3',    'c1',   'c2',   'c3', 'd1',    'd2',  'd3',   'e1',  'e2',  'e3',
           'b4',   'b5',   'c4',   'c5',  'e4','e5',
           'b6', 'b7', 'b8', 'c6', 'c7', 'c8']
@@ -100,7 +90,7 @@ ax2_upper.text(0.5, -0.05, '//', ha='center', va='top',
                transform=ax2_upper.transAxes, fontsize=14, fontweight='bold')
 
 plt.tight_layout()
-plt.savefig('fig6.png', dpi=900)
+plt.savefig('paper-fig9.png', dpi=900)
 plt.show()
 
 
@@ -165,5 +155,5 @@ ax2_upper.text(0.5, -0.08, '//', ha='center', va='top',
 fig.text(0.515, bottom + height/2, 'RMSE',
          rotation=90, va='center', ha='center', fontsize=font_size_label)
 
-plt.savefig('fig6.png', dpi=900)
+plt.savefig('paper-fig9', dpi=900)
 plt.show()

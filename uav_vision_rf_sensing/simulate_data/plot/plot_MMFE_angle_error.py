@@ -1,11 +1,17 @@
+import numpy as np
 import torch
 import os
 import seaborn as sns
+from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
 from numpy import mean
 
-from functions import plot_topk_line, plot_topk_bar, is_target_in_beam, is_target_in_4neighbor_beam, \
-    is_target_in_8neighbor_beam, is_target_in_25neighbor_beam
+try:
+    from .functions import plot_topk_line, plot_topk_bar, is_target_in_beam, is_target_in_4neighbor_beam, \
+        is_target_in_8neighbor_beam, is_target_in_25neighbor_beam
+except ImportError:
+    from functions import plot_topk_line, plot_topk_bar, is_target_in_beam, is_target_in_4neighbor_beam, \
+        is_target_in_8neighbor_beam, is_target_in_25neighbor_beam
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = ['serif']
 plt.rcParams['font.serif'] = ['Times New Roman']
@@ -198,11 +204,11 @@ if __name__ == "__main__":
 
     print("\n".join([
         f"MMFE  Azimuth MSE: {format_scientific(az_mse_pred1_true)}",
-        f"MMFE  Elevation MSE: {format_scientific(el_mse_pred1_true)}"
+        f"MMFE  Elevation MSE: {format_scientific(el_mse_pred1_true)}",
         f"V2EDA Azimuth MSE: {format_scientific(az_mse_vision_true)}",
         f"V2EDA Elevation MSE: {format_scientific(el_mse_vision_true)}",
         f"Echo-Only Azimuth MSE: {format_scientific(az_mse_echoOnly_true)}",
-        f"Echo-Only Elevation MSE: {format_scientific(el_mse_echoOnly_true)}"
+        f"Echo-Only Elevation MSE: {format_scientific(el_mse_echoOnly_true)}",
         f"MMFE wo Fuse Azimuth MSE:{format_scientific(az_mse_noFusepred_true)}",
         f"MMFE wo Fuse Elevation MSE:{format_scientific(el_mse_noFusepred_true)}",
         f"KL Azimuth MSE: {format_scientific(az_mse_klpred_true)}",
@@ -229,70 +235,6 @@ if __name__ == "__main__":
     #print("mse : ", mean(el_diff_pred1_true))
     #print("mse : ", mean(az_diff_echoOnly_true))
     #print("mse : ", mean(el_diff_echoOnly_true))
-
-    # ==================== 箱线图 ====================
-    import numpy as np
-
-    # 布局参数
-    group_gap = 0.2  # Az-El-d 之间空白
-    inner_gap = 0.2  # 组内间隔
-    box_width = 0.2
-
-    # 计算箱线图位置
-    positions, data_all, colors_all = [], [], []
-    start = 0.5
-    for grp, cols in [(az_data, 5), (el_data, 5)]:
-        pos = [start + inner_gap * i for i in range(cols)]
-        positions.extend(pos)
-        data_all.extend(grp)
-        colors_all.extend(plot_config['colors'][:cols])
-        start += cols * inner_gap + group_gap
-
-    # 绘图
-    fig, ax_left = plt.subplots(figsize=(6, 4))
-    # ax_right = ax_left.twinx()              # 右侧 y 轴给距离用
-    meanprops = dict(marker='o',  # 圆点
-                     markerfacecolor='white',
-                     markeredgecolor='black',
-                     markersize=4)
-    # 画箱线图：Az/El 用左轴，d 用右轴
-    bplot = ax_left.boxplot(data_all[:10],
-                            positions=positions[:10],
-                            widths=box_width,
-                            patch_artist=True,
-                            showfliers=False,  # 1. 显示异常值
-                            showmeans=True,  # 2. 显示均值
-                            medianprops={'color': 'white', 'linewidth': 1},
-                            meanprops=meanprops)  # 3. 均值线颜)
-
-    # 着色
-    for patch, color in zip(bplot['boxes'], colors_all):
-        patch.set_facecolor(color)
-        patch.set_alpha(0.7)
-
-    # 坐标轴 & 标签
-    ax_left.tick_params(labelsize=18)
-    # ax_right.tick_params(labelsize=18)
-    ax_left.set_xticks([np.mean(positions[i:i + 5 if i < 6 else i + 5]) for i in [0, 5]])
-    ax_left.set_xticklabels(['Azimuth', 'Elevation'], fontsize=20)
-    ax_left.set_ylabel('Angle Error (rad)', color='black', fontsize=20)
-    # ax_right.set_ylabel('Distance Error (m)', color='black', fontsize=20)
-
-    # 图例
-    from matplotlib.lines import Line2D
-
-    legend_elements = [Line2D([0], [0],
-                              color=c, label=l, linestyle=ls, alpha=0.7)
-                       for c, l, ls in
-                       zip(plot_config['colors'][:5], plot_config['labels'], plot_config['line_styles'])]
-    ax_left.legend(handles=legend_elements, loc='upper left', fontsize=18)
-
-    # ax_left.set_title('Error Distribution Comparison')
-    plt.tight_layout()
-    save_box = os.path.join(current_dir, 'fig8_1.png')
-    plt.savefig(save_box, dpi=900, bbox_inches='tight')
-    plt.show()
-
     # =============分开的箱线图
 
     # 布局参数
@@ -352,7 +294,7 @@ if __name__ == "__main__":
 
     # 保存方位角图像
     plt.tight_layout()
-    save_az = os.path.join(current_dir, 'fig8_2.png')
+    save_az = os.path.join(current_dir, 'paper-fig8_2.png')
     plt.savefig(save_az, dpi=900, bbox_inches='tight')
     plt.show()
 
@@ -386,7 +328,7 @@ if __name__ == "__main__":
 
     # 保存仰角图像
     plt.tight_layout()
-    save_el = os.path.join(current_dir, 'fig8_3.png')
+    save_el = os.path.join(current_dir, 'paper-fig8_3.png')
     plt.savefig(save_el, dpi=900, bbox_inches='tight')
     plt.show()
 
@@ -417,7 +359,7 @@ if __name__ == "__main__":
         # hspace=0.4,    # 子图间垂直间距
         wspace=0.3  # 子图间水平间距（对多列子图有用）
     )
-    save_path = os.path.join(current_dir, 'fig8_4.png')
+    save_path = os.path.join(current_dir, 'paper-fig8_4.png')
     plt.savefig(save_path, dpi=900, bbox_inches='tight')
     print(f"综合分析图已保存至: {save_path}")
     plt.show()
@@ -448,7 +390,7 @@ if __name__ == "__main__":
         # hspace=0.4,    # 子图间垂直间距
         wspace=0.3  # 子图间水平间距（对多列子图有用）
     )
-    save_path = os.path.join(current_dir, 'fig8_5.png')
+    save_path = os.path.join(current_dir, 'paper-fig8_5.png')
     plt.savefig(save_path, dpi=900, bbox_inches='tight')
     print(f"综合分析图已保存至: {save_path}")
     plt.show()

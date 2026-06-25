@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 
 # ====================== 全局字体、样式设置（论文格式） ======================
@@ -154,6 +156,6 @@ ax.set_ylim(ymin, ymax)
 ax.text(0.5, -0.21, '(f) Lot lost', transform=ax.transAxes, ha='center', fontsize=SIZE_TEXT)
 
 plt.tight_layout()
+output_path = Path(__file__).resolve().parent / "paper_fig11.png"
+plt.savefig(output_path, dpi=900, bbox_inches='tight')
 plt.show()
-
-plt.savefig("fig11", dpi=900, bbox_inches='tight')

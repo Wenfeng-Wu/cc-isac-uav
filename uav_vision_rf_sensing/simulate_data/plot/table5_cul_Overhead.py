@@ -2,7 +2,10 @@ import torch
 import os
 import matplotlib.pyplot as plt
 
-from simulate_data.plot.polt_fig8_cdf_topk import print_topk
+try:
+    from .plot_MMFE_angle_error import print_topk
+except ImportError:
+    from plot_MMFE_angle_error import print_topk
 
 plt.rcParams['font.family'] = ['serif']
 plt.rcParams['font.serif'] = ['Times New Roman']

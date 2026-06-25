@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from pathlib import Path
 from Calibration_nets.vision_net_est_ab_light import Vision_Net
 from data_process.set_dataset_uavonly import uav_dataset_set
 
@@ -15,7 +16,8 @@ right_model = Vision_Net()
 print(right_model)
 # 设置参数
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-right_model_path = 'C:/FengFeng/Muilty_Modal_fusion/uav_vision_assisted/code/uav_vision_rf_sensing/Calibration_nets/weights/vision_net_est_ab_e100.pth'
+project_root = Path(__file__).resolve().parents[2]
+right_model_path = project_root / 'Calibration_nets' / 'weights' / 'vision_net_est_ab_e100.pth'
 right_model.load_state_dict(torch.load(right_model_path, map_location=device))
 right_model.to(device).eval()
 train_loader, test_loader = uav_dataset_set()

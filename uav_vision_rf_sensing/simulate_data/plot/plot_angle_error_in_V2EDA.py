@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     # 保存第一个图像
     plt.subplots_adjust(right=0.98)
-    save_path1 = os.path.join(current_dir, 'fig1.png')
+    save_path1 = os.path.join(current_dir, 'paper-fig7a.png')
     plt.savefig(save_path1, dpi=900, bbox_inches='tight')
     print(f"方位角误差直方图已保存至: {save_path1}")
     plt.show()
@@ -168,7 +168,7 @@ if __name__ == "__main__":
                    edgecolor='gray', linewidth=0.2))
     # 保存第二个图像
     plt.subplots_adjust(right=0.98)
-    save_path2 = os.path.join(current_dir, 'fig2.png')
+    save_path2 = os.path.join(current_dir, 'paper-fig7b.png')
     plt.savefig(save_path2, dpi=900, bbox_inches='tight')
     print(f"仰角误差直方图已保存至: {save_path2}")
     plt.show()
