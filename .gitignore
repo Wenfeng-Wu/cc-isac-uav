@@ -10,3 +10,7 @@ __pycache__/
 *.zip
 *.rar
 *.7z
+
+# IDE project files
+.idea/
+*.iml
