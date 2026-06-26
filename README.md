@@ -89,7 +89,7 @@ Run the following commands from `uav_vision_rf_sensing/`.
 
 If this repository is useful for your research, please cite the paper:
 
-@ARTICLE{11570999,
+```@ARTICLE{11570999,
   author={Wu, Wenfeng and Xiang, Luping and Yang, Kun},
   journal={IEEE Journal of Selected Topics in Signal Processing}, 
   title={A Camera-Cooperative ISAC Framework for Multimodal Non-Cooperative UAVs Sensing}, 
@@ -99,7 +99,7 @@ If this repository is useful for your research, please cite the paper:
   pages={1-16},
   keywords={Beams;Modeling;Integrated sensing and communication;Autonomous aerial vehicles;Tracking;Timing;Visual systems;Cameras;Visualization;Signal detection;Integrated Sensing and Communication (ISAC);Camera-cooperative ISAC;Non-cooperative UAV detection;Multimodal fusion;Beam steering and tracking},
   doi={10.1109/JSTSP.2026.3705654}}
-
+```
 
 ## Contact
 
